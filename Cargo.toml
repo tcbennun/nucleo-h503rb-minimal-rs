@@ -1,0 +1,96 @@
+[package]
+edition = "2021"
+name = "nucleo-h503rb-minimal-rs"
+version = "0.1.0"
+
+[features]
+default = ["defmt"]
+defmt = [
+    "dep:defmt",
+    "dep:defmt-rtt",
+    "panic-probe/print-defmt",
+    "embassy-stm32/defmt",
+    "embassy-executor/defmt",
+]
+lsi = []
+
+[dependencies]
+defmt = { version = "0.3", optional = true }
+defmt-rtt = { version = "0.4", optional = true }
+panic-probe = "0.3"
+
+################################################################################
+# Embassy
+################################################################################
+
+[dependencies.embassy-stm32]
+path = "./embassy/embassy-stm32"
+features = [
+    "stm32h503rb",
+    "memory-x",
+    "time-driver-any",
+]
+
+[dependencies.embassy-executor]
+path = "./embassy/embassy-executor"
+features = [
+    "arch-cortex-m",
+    "executor-thread",
+    "integrated-timers",
+]
+
+################################################################################
+# Cortex-M
+################################################################################
+
+[dependencies.cortex-m]
+version = "0.7.6"
+features = [
+    "inline-asm",
+    "critical-section-single-core",
+]
+
+[dependencies.cortex-m-rt]
+version = "0.7.0"
+
+################################################################################
+# Build profiles
+################################################################################
+
+# cargo build/run
+[profile.dev]
+codegen-units = 1
+debug = true
+debug-assertions = true
+incremental = true
+opt-level = 0
+overflow-checks = true
+
+# cargo test
+[profile.test]
+codegen-units = 1
+debug = 2
+debug-assertions = true # <-
+incremental = false
+opt-level = 3 # <-
+overflow-checks = true # <-
+
+# cargo build/run --release
+[profile.release]
+codegen-units = 1
+debug = 2
+debug-assertions = false # <-
+incremental = false
+lto = 'fat'
+opt-level = 3 # <-
+overflow-checks = false # <-
+
+# cargo test --release
+[profile.bench]
+codegen-units = 1
+debug = 2
+debug-assertions = false # <-
+incremental = false
+lto = 'fat'
+opt-level = 3 # <-
+overflow-checks = false # <-
